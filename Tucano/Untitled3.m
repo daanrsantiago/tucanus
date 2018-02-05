@@ -1,0 +1,1 @@
+legend('imax',num2str(v(4))+" volt",num2str(v(5))+" volt",num2str(v(6))+" volt",num2str(v(7))+" volt",num2str(v(8))+" volt")
