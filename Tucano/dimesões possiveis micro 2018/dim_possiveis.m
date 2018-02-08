@@ -76,13 +76,15 @@ for n = 1:100
     
     Soma = V_asa+V_boom+V_eh+V_ev+V_fus+V_roda1+V_roda2+3*V_bat;
     
-    if Soma <= 30000
+    if Soma <= 28000
         asa(i,:) = asa_ale;
         boom(i,:) = boom_ale;
         eh(i,:) = eh_ale;
         ev(i,:) = ev_ale;
         fus(i,:) = fus_ale;
-        dim_aeronave(:,:,i) = {asa(i,:);boom(i,:);eh(i,:);ev(i,:);fus(i};
+        Soma_1(i) = Soma;
+        Soma
+        dim_aeronave(:,:,i) = {asa(i,:);boom(i,:);eh(i,:);ev(i,:);fus(i,:)};
         i = i+1;
     end
 end
