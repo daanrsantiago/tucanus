@@ -50,15 +50,15 @@ J = zeros(1,length(V));
 
 %% Estático
 
-RPM = 1600:1:13000;
-ome = RPM*2*pi/60;
-nhz = RPM/60;
+RPMs = 1600:1:13000;
+omes = RPMs*2*pi/60;
+nhzs = RPMs/60;
 
-Qm = ((v(6) - ome./kv)./r - i0)./kv;
-Qps = rho*nhz.^2*D^5.*polyval(pCqs,RPM);
+Qm = ((v(6) - omes./kv)./r - i0)./kv;
+Qps = rho*nhzs.^2*D^5.*polyval(pCqs,RPMs);
 [M,I] = min(abs(Qm-Qps));
 
-RPM = RPM(I);
+RPM = RPMs(I);
 nhz = RPM/60;
 ome = nhz*2*pi;
 
