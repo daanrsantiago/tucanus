@@ -12,7 +12,7 @@ r = r(motor);
 i0 = i0(motor);
 imax = imax(motor);
 
-clear sm
+
 
 %% Ecolha da Voltagem e velocidade
 
@@ -24,6 +24,7 @@ V = 0.1:0.1:25;
 rho = 1.053;
 Ts1 = zeros(length(prop_nome),1);
 RPM = zeros(1,137);
+i = zeros(1,137);
 n = 1;
 
 %% Estático
@@ -48,7 +49,13 @@ for I_helice = 1:length(prop_nome)
     nhz = RPM(I_helice)/60;
     ome = nhz*2*pi;
 
-    Ts1(I_helice) = rho*nhz^2*D^4*polyval(pCts1,RPM(I_helice))/9.81;
+    i(1,I_helice) = (v(6)-ome/kv)/r;
+    
+    if i(1,I_helice) > imax
+        Ts1(I_helice) = 0;
+    else
+        Ts1(I_helice) = rho*nhz^2*D^4*polyval(pCts1,RPM(I_helice))/9.81;
+    end
     if Ts1(I_helice) ~= 0
         Ts(n) = Ts1(I_helice);
         n = n+1;
@@ -62,7 +69,7 @@ Qp_max = rho*nhzs.^2*D_max^5.*polyval(pCps(I_max,:)/(2*pi),RPMs);
 
 
 plot(RPMs,Qm);
-grid on
+grid minor
 hold on
 xlabel 'RPM'
 ylabel 'Torque [N/M]'

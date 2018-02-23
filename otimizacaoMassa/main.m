@@ -34,16 +34,16 @@ initial_time = cputime;
 VTR = 1.e-10; 
 D = 3;
 %% o Motor oficial está no INDICE 9
-XVmin = [1 1 2]; % motor 1->32 helice 1->16 numCelula autom.
-XVmax = [32 14 6];
+XVmin = [57 1 2]; % motor 1->32 helice 1->16 numCelula autom.
+XVmax = [57 14 6];
 
 y=[]; 
 NP = 10*D; 
-itermax = 200; 
+itermax = 30; 
 F = 0.8; 
 CR = 0.5; 
 strategy=7;
-refresh=5;
+refresh = 5;
 
-[X,FO,NF]=differential_evolution('FuncaoObjetivo_modificada',VTR,D,XVmin,XVmax,y,NP,itermax,F,CR,strategy,refresh)
+[X,FO,NF]=differential_evolution('FuncaoObjetivo_modificada2',VTR,D,XVmin,XVmax,y,NP,itermax,F,CR,strategy,refresh)
 
