@@ -8,9 +8,6 @@ load('engine_data.mat') % carrega o banco de dados de motores
 % retira do banco de dados de motores os parametros do motor ecolhido (kv,
 % r, io e imax)
 
-% o "buscam" vem de busca motor. Ele consegue achar o indice do motor no
-% banco de dados tendo como input o nome dele
-
 motor = buscam(sm,'Scorpion SII-3026-890KV');
 kv = kv(motor)*2*pi/60;
 r = r(motor);
@@ -59,9 +56,6 @@ V = 0.1:0.1:25; % o V maiúsculo é para os valores de velocidade
 
 %% Inicialização de variaveis
 
-% inicializar os vetores com zeros ajuda a dar velocidade aos loops, ja que
-% os vetores não mudam de tamanho a cada interação
-
 rho = 1.053;
 T = zeros(1,length(V));
 J = zeros(1,length(V));
@@ -92,8 +86,7 @@ Ts = rho*nhz^2*D^4*0.1085/9.81; % Ts é a tração no estatico
 % a tração é calculada pelo polinomio ao invez dos dados "puros" do
 % fabricante
 
-% caso a razão de avanço esteja entre os valores de J_min e J_max então são
-% usados apenas os dados que estão no documento do fabricante
+% caso a razão de avanõ
 
 for I_V = 1:length(V)
     J(I_V) = V(I_V)/(nhz*D);
@@ -105,9 +98,7 @@ for I_V = 1:length(V)
     T(I_V) = rho*nhz^2*D^4*Ct/9.81;
 end
 
-% plota os resultados da curva de tração
-
 plot(V,T)
-grid minor
+grid on
 xlabel 'Velocidade [m/s]'
 ylabel 'Tração [kg]'
