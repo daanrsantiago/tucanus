@@ -1,0 +1,281 @@
+function[geo, penal] = geometrico(geo, dsp, plotar)
+
+% clear all; close all; clc;
+% tic
+
+%% Observações
+
+% A origem fica no ca da asa.
+% eixo x positivo para frente da aeronave
+% eixo z positivo para cima
+% Asa dividida em 3 estações, totalizando 4 perfis
+
+% desenha ou nao a aeronvae
+% plotar = 0;
+
+%% Parâmetros de entrada
+
+% Parâmetros da asa
+% Parâmetros da asa
+ARw			= geo.w.AR;			% [ ] Alongamento da asa
+bw			= geo.w.bw;			% [m] Envergadura da asa
+lamb1		=1; %geo.w.lamb(1);	% [ ] Afilamento da estação central
+lamb1= geo.w.lamb;
+% sweep1		= geo.w.e(1);		% [º] Enflechamento da estaçao central
+% teta1		= geo.w.d(1);		% [º] Diedro da estação central
+ai1			= geo.w.ai;			% [º] Ângulo de incidência da raiz da estação central
+wo1			= geo.w.wo(1);		% [º] Torção geométrica da estação central
+h_caw_root			= geo.w.h_caw_root;			% [m] Altura do CA da asa na raiz
+
+
+
+
+% Parâmetros da empenagem horizontal
+lambeh		= geo.eh.lamb;
+crooteh		= geo.eh.croot;
+AReh		= geo.eh.AR;
+
+% Parâmetros da fuselagem   (cc ==> compartimento de carga)
+ecc			= geo.o.ecc;		% [m] Largura da fuselagem
+lcc			= geo.o.lcc;		% [m] comprimento da fuselagem
+l_bico		= geo.o.l_bico;		% [m] Comprimento longitudinal do bico (até bordo de ataque)
+hcc= geo.o.hcc;     %[m] Altura total da fuselagem
+
+%% Definição das dimensões da asa
+
+% semi-envergadura
+bw2 = bw/2;
+
+
+
+% area da asa
+Sw = (bw)^2/ARw;
+cw = Sw/bw;   %? A ASA CONSIDERA A ÁREA INTEIRA OU É SÓ METADE?
+
+% comprimento longitudinal da aeronave
+geo.o.comprimento = 3.5 - .03 - bw;  %????????? MAS QUE RAIOS ?????
+
+% distancia entre ca's
+le = geo.o.comprimento - l_bico - .25*cw - .75*crooteh;
+geo.o.le = le;
+
+% corda dos perfis
+
+geo.w.c = cw ;
+
+
+% alturas dos perfis
+h_ponta = h_caw_root ;
+
+
+% posição do CA da asa (origem = 0)
+xc25 = 0;
+
+% posições dos vértices da asa
+% bordo de ataque do perfil 1
+v1ax	= xc25 + cw*.25*cosd(ai1);
+v1ay	= ecc/2;
+v1az	= h_caw_root + cw*.25*sind(ai1);
+
+% bordo de fuga do perfil 1
+v1fx	= xc25 - cw*.75*cosd(ai1);
+v1fy	= ecc/2;
+v1fz	= h_caw_root - cw*.75*sind(ai1);
+
+% bordo de ataque do perfil 2
+v2ax	= v1ax;
+v2ay	= ecc/2 + bw2;
+v2az	= v1az;
+
+% bordo de fuga do perfil 2
+v2fx	= v1fx;
+v2fy	= ecc/2 + bw2;
+v2fz	= v1fz;
+
+
+geo.w.b = bw;  
+
+S1 = cw*bw2;
+
+
+geo.w.S		= S1;
+geo.w.Sref	= 2*sum(geo.w.S);
+
+geo.w.ang_arf = geo.w.aoa - geo.w.ai(1);     % ?????? MAS QUE RAIOS ?????
+%% Flap
+
+% 	[perfil] = seleciona_perfil(geo.w.perfil(1), 'flap', geo.w.flap);
+%
+% 	% flap
+% 	fpc		= perfil.cor;	% [ ] Porcentagem da corda utilizada pelo flap
+% 	fpb		= 1;			% [ ] Porcentagem da envergadura da estação central utilizada pelo flap
+% 	fd		= perfil.def;	% [º] Deflexão do flap
+% 	fbi		= 0;			% [ ] Porcentagem da envergadura da estação central onde começa o flap
+%
+% 	% cordas da seção no inicio e fim do flap
+% 	cf1 = (c1 - c2)*(1 - fbi) + c2;
+% 	cf2 = (c1 - c2)*(1 - fbi - fpb) + c2;
+%
+% 	% vertices do flap
+% 	% ponto do hinge no começo do flap
+% 	vf1hx = xc25 - fbi*b1*tand(sweep1) - (0.75 - fpc)*cf1*cosd((ai2 - ai1)*fbi + ai1);
+% 	vf1hy = ecc/2 + fbi*b1;
+% 	vf1hz = h1 + fbi*b1*tand(teta1) - (0.75 - fpc)*cf1*sind((ai2 - ai1)*fbi + ai1);
+%
+% 	% ponto do bordo de fuga no flap no começo do flap
+% 	vf1fx = xc25 - fbi*b1*tand(sweep1) - (0.75 - fpc)*cf1*cosd((ai2 - ai1)*fbi + ai1) - cf1*fpc*cosd((ai2 - ai1)*fbi + ai1 + fd);
+% 	vf1fy = ecc/2 + fbi*b1;
+% 	vf1fz = h1 + fbi*b1*tand(teta1) - (0.75 - fpc)*cf1*sind((ai2 - ai1)*fbi + ai1) - cf1*fpc*sind((ai2 - ai1)*fbi + ai1 + fd);
+%
+% 	% ponto do bordo de fuga na asa no começo do flap
+% 	vf1wx = xc25 - fbi*b1*tand(sweep1) - 0.75*cf1*cosd((ai2 - ai1)*fbi + ai1);
+% 	vf1wy = ecc/2 + fbi*b1;
+% 	vf1wz = h1 + fbi*b1*tand(teta1) - 0.75*cf1*sind((ai2 - ai1)*fbi + ai1);
+%
+% 	% ponto do hinge no fim do flap
+% 	vf2hx = xc25 - (fbi+fpb)*b1*tand(sweep1) - (0.75 - fpc)*cf2*cosd((ai2 - ai1)*(fbi+fpb) + ai1);
+% 	vf2hy = ecc/2 + (fbi+fpb)*b1;
+% 	vf2hz = h1 + (fbi+fpb)*b1*tand(teta1) - (0.75 - fpc)*cf2*sind((ai2 - ai1)*(fbi+fpb) + ai1);
+%
+% 	% ponto do bordo de fuga no flap no fim do flap
+% 	vf2fx = xc25 - (fbi+fpb)*b1*tand(sweep1) - (0.75 - fpc)*cf2*cosd((ai2 - ai1)*(fbi+fpb) + ai1) - cf2*fpc*cosd((ai2 - ai1)*(fbi+fpb) + ai1 + fd);
+% 	vf2fy = ecc/2 + (fbi+fpb)*b1;
+% 	vf2fz = h1 + (fbi+fpb)*b1*tand(teta1) - (0.75 - fpc)*cf2*sind((ai2 - ai1)*(fbi+fpb) + ai1) - cf2*fpc*sind((ai2 - ai1)*(fbi+fpb) + ai1 + fd);
+%
+% 	% ponto do bordo de fuga na asa no fim do flap
+% 	vf2wx = xc25 - (fbi+fpb)*b1*tand(sweep1) - 0.75*cf2*cosd((ai2 - ai1)*(fbi+fpb) + ai1);
+% 	vf2wy = ecc/2 + (fbi+fpb)*b1;
+% 	vf2wz = h1 + (fbi+fpb)*b1*tand(teta1) - 0.75*cf2*sind((ai2 - ai1)*(fbi+fpb) + ai1);
+
+
+%% Distancias do cg
+
+% hc25cg = phcg*(geo.o.Rroda + 0.009 - geo.w.h - 0.1 + 0.03) + 0.1;
+% hc25cg = Rroda + 0.009 + 0.05 - geo.w.h;
+% geo.o.xc25cg	= xc25cg;			% [m] distância horizontal do ca ao cg
+% geo.o.hc25cg	= hc25cg;			% [m] distância vertical do ca ao cg
+% geo.o.hcg		= geo.w.h + hc25cg;	% [m] altura do cg
+% geo.o.xcg		= xcg;				% [m] x do cg
+
+%% Definição das dimensões da empenagem horizontal
+
+% corda da ponta da eh
+ctipeh		= crooteh*lambeh;
+beh			= AReh*crooteh*(1 + lambeh)/2;
+Seh			= beh^2/AReh;
+
+geo.eh.ctip = ctipeh;
+geo.eh.b	= beh;
+geo.eh.S	= Seh;
+
+%% Posicionamento do motor (para a estabilidade)
+
+geo.o.Zp	= 0;				% [m] Altura do CG até o eixo do motor
+geo.o.xp	= lcc/2 + l_bico;	% [m] Distância horizontal da hélice até o CG
+
+%% Distancias horizontais e verticais para momento em torno do trem de pouso no desempenho.m
+
+% ESTIMADOS  !!!!!!!!!!!!!!!!!!!!1ALTERAR !!!!!!!!!!!!!!1
+
+geo.o.v_motor	= 0.15;   %!!!!!!!!!!!!!!!!!!!!1ALTERAR !!!!!!!!!!!!!!1
+% geo.o.h_motor   = 0.3;
+% geo.o.r_motor = sqrt(geo.o.h_motor^2 + geo.o.v_motor^2);
+% geo.o.g_motor = atand(geo.o.v_motor/geo.o.h_motor);
+
+geo.o.h_w		= 0.03;          %!!!!!!!!!!!!!!!!!!!!1ALTERAR !!!!!!!!!!!!!!1
+geo.o.v_w		= 0.15 + 0.07;     %!!!!!!!!!!!!!!!!!!!!1ALTERAR !!!!!!!!!!!!!!1
+
+geo.o.v_ev		= 0.3;            %!!!!!!!!!!!!!!!!!!!!1ALTERAR !!!!!!!!!!!!!!1
+
+% geo.o.h_cg		= xcg - xtp;
+% geo.o.v_cg		= hcg - 0.04;
+% geo.o.r_cg = sqrt(geo.o.h_cg^2 + geo.o.v_cg^2);
+% geo.o.g_cg = atand(geo.o.v_cg/geo.o.h_cg);
+
+
+%% plot apenas para visualização
+
+if plotar
+	% Asa
+	
+	% 	plotx1 = [v1ax v2ax v2fx vf2wx vf2hx vf2fx vf1fx vf1hx vf1wx v1fx v1ax];
+	% 	ploty1 = [v1ay v2ay v2fy vf2wy vf2hy vf2fy vf1fy vf1hy vf1wy v1fy v1ay];
+	% 	plotz1 = [v1az v2az v2fz vf2wz vf2hz vf2fz vf1fz vf1hz vf1wz v1fz v1az];
+	plotx1 = [v1ax v2ax v2fx v1fx v1ax];
+	ploty1 = [v1ay v2ay v2fy v1fy v1ay];
+	plotz1 = [v1az v2az v2fz v1fz v1az];
+	
+% 	plotx2 = [v2ax v3ax v3fx v2fx];
+% 	ploty2 = [v2ay v3ay v3fy v2fy];
+% 	plotz2 = [v2az v3az v3fz v2fz];
+% 	
+% 	plotx3 = [v3ax v4ax v4fx v3fx];
+% 	ploty3 = [v3ay v4ay v4fy v3fy];
+% 	plotz3 = [v3az v4az v4fz v3fz];
+	
+	plot3(plotx1,ploty1,plotz1,'b','LineWidth',1.3)
+	xlabel('x')
+	ylabel('y')
+	zlabel('z')
+	hold on
+	grid minor
+	% 	plot3([vf1hx vf2hx],[vf1hy vf2hy],[vf1hz vf2hz],'b','LineWidth',1.3)
+% 	plot3(plotx2,ploty2,plotz2,'r','LineWidth',1.3)
+% 	plot3(plotx3,ploty3,plotz3,'g','LineWidth',1.3)
+% 	
+	set(gca,'BoxStyle','full','Box','on')
+	daspect([1 1 1])
+	view(-90, 90);
+	axis equal
+	
+	% Empenagem horizontal
+	% 	plotehx = [xbf (xbf + crooteh - ctipeh) (xbf + crooteh) (xbf + crooteh) xbf];
+	% 	plotehy = [0 beh/2 beh/2 0 0];
+	% 	plotehz = [hbf hbf hbf hbf hbf];
+	%
+	% 	plot3(plotehx,plotehy,plotehz,'m','LineWidth',1.3)
+	%
+	% 	plotR = cone_Rh(hbf);
+	% 	plot3(plotR.*cos(volta),plotR*sin(volta),hbf*ones(length(volta)),'--m')
+	
+	% Trem de pouso e arfagem
+	% 	plot3(Rroda.*cos(volta) + xtp,ecc/2*ones(length(volta)),Rroda*sin(volta) + Rroda,'k','LineWidth',1.3)
+	%
+	% 	arfx = xbf:0.01:xtp;
+	% 	arfz = coefang*arfx + coeflin;
+	% 	plot3(arfx,zeros(length(arfx)),arfz,'k')
+	
+	% Fuselagem
+	% 	plotfsx = [(xcg+lcc/2) (xcg+lcc/2) (xcg-lcc/2) (xcg-lcc/2) (xcg+lcc/2)];
+	% 	plotfsy = [ecc/2 -ecc/2 -ecc/2 ecc/2 ecc/2];
+	% 	plotfsz = (0.055 + hcc)*ones(length(plotfsx));
+	% 	plot3(plotfsx,plotfsy,plotfsz,'k','LineWidth',1.3)
+	%
+	% 	plotfiz = (0.055)*ones(length(plotfsx));
+	% 	plot3(plotfsx,plotfsy,plotfiz,'k','LineWidth',1.3)
+	%
+	% 	plotfdy = (ecc/2)*ones(length(plotfsx));
+	% 	plotfdz = [(0.055+hcc) 0.055 0.055 (0.055+hcc) (0.055+hcc)];
+	% 	plot3(plotfsx,plotfdy,plotfdz,'k','LineWidth',1.3)
+	%
+	% 	plotisz = (0.055)*ones(length(plotfsx));
+	% 	plot3(plotfsx,plotfsy,plotisz,'k','LineWidth',1.3)
+	%
+	% 	plotfey = (-ecc/2)*ones(length(plotfsx));
+	% 	plotfez = [(0.055+hcc) 0.055 0.055 (0.055+hcc) (0.055+hcc)];
+	% 	plot3(plotfsx,plotfey,plotfez,'k','LineWidth',1.3)
+	
+	% CG
+	% 	plot3(xcg,0,hcg,'*r')
+	
+	keyboard
+end
+
+%% penaliza ou nao a aeronave
+if ~exist('penal','var')
+	penal = 0;
+end
+
+% toc
+
+end

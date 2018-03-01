@@ -1,0 +1,123 @@
+clear
+clc
+
+load('engine_data.mat') % carrega o banco de dados de motores
+
+global RPMs_apc Cps_apc Cts_apc D_apc
+
+%% escolha do motor
+
+% retira do banco de dados de motores os parametros do motor ecolhido (kv,
+% r, io e imax)
+
+% o "buscam" vem de busca motor. Ele consegue achar o indice do motor no
+% banco de dados tendo como input o nome dele
+
+motor = buscam(sm,'Scorpion SII-3026-890KV');
+kv = kv(motor)*2*pi/60;
+r = r(motor);
+i0 = i0(motor);
+imax = imax(motor);
+
+clear sm
+
+%% hélice
+
+RPMs_apc.prop_12x6E = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000];
+Cps_apc.prop_12x6E = [0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.05	0.06	0.06	0.07	0.08	0.08	0.10	0.08];
+Cts_apc.prop_12x6E = [0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.11	0.11	0.11	0.11	0.11	0.11];
+D_apc(1) = 12*0.0254;
+
+RPMs_apc.prop_11x7 = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000	18000	19000	21000];
+Cps_apc.prop_11x7 = [0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.07	0.09	0.10	0.12	0.14	0.16	0.15	0.14	0.12	0.15	0.11	0.07	0.09];
+Cts_apc.prop_11x7 = [0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12];
+D_apc(2) = 11*0.0254;
+
+RPMs_apc.prop_10x6E = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000	18000	19000	20000	23000];
+Cps_apc.prop_10x6E = [0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.05	0.06	0.07	0.08	0.09	0.10	0.11	0.13	0.14	0.18	0.17	0.13];
+Cts_apc.prop_10x6E = [0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.12	0.13	0.13	0.13	0.12];
+D_apc(3) = 10*0.0254;
+
+RPMs_apc.prop_10x5E = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000	18000	19000	20000	21000];
+Cps_apc.prop_10x5E = [0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.05	0.05	0.05	0.06	0.06	0.07	0.08	0.08	0.11	0.12	0.12];
+Cts_apc.prop_10x5E = [0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.12	0.12	0.12	0.12	0.12	0.12	0.12];
+D_apc(4) = 10*0.0254;
+
+RPMs_apc.prop_12x5 = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000	18000	19000	20000];
+Cps_apc.prop_12x5 = [0.03	0.03	0.03	0.03	0.03	0.03	0.03	0.03	0.03	0.04	0.04	0.04	0.05	0.06	0.07	0.09	0.09	0.09	0.07	0.07];
+Cts_apc.prop_12x5 = [0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.09	0.10	0.10	0.10	0.10	0.10	0.10	0.09	0.09];
+D_apc(5) = 12*0.0254;
+
+RPMs_apc.prop_11x55E = [1000	2000	3000	4000	5000	6000	7000	8000	9000	10000	11000	12000	13000	13999	15000	16000	17000	18000	19000	20000	21000	22000];
+Cps_apc.prop_11x55E = [0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.04	0.05	0.05	0.06	0.06	0.07	0.07	0.08	0.10	0.11	0.10	0.08	0.07	0.06];
+Cts_apc.prop_11x55E = [0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.10	0.11	0.11	0.11	0.11	0.11	0.11	0.11	0.12	0.12	0.12	0.11	0.11	0.11];
+D_apc(6) = 11*0.0254;
+
+% é feito um polyfit para obter valores de Cp e Ct estaticos "discretos",
+% ou seja para rotações entre os valores dados no vetor RPMs
+
+pCps(1,:) = polyfit(RPMs_apc.prop_12x6E,Cps_apc.prop_12x6E,1);
+pCts(1,:) = polyfit(RPMs_apc.prop_12x6E,Cts_apc.prop_12x6E,1);
+pCqs(1,:) = pCps(1,:)/(2*pi);
+
+pCps(2,:) = polyfit(RPMs_apc.prop_11x7,Cps_apc.prop_11x7,1);
+pCts(2,:) = polyfit(RPMs_apc.prop_11x7,Cts_apc.prop_11x7,1);
+pCqs(2,:) = pCps(2,:)/(2*pi);
+
+pCps(3,:) = polyfit(RPMs_apc.prop_10x6E,Cps_apc.prop_10x6E,1);
+pCts(3,:) = polyfit(RPMs_apc.prop_10x6E,Cts_apc.prop_10x6E,1);
+pCqs(3,:) = pCps(3,:)/(2*pi);
+
+pCps(4,:) = polyfit(RPMs_apc.prop_10x5E,Cps_apc.prop_10x5E,1);
+pCts(4,:) = polyfit(RPMs_apc.prop_10x5E,Cts_apc.prop_10x5E,1);
+pCqs(4,:) = pCps(4,:)/(2*pi);
+
+pCps(5,:) = polyfit(RPMs_apc.prop_12x5,Cps_apc.prop_12x5,1);
+pCts(5,:) = polyfit(RPMs_apc.prop_12x5,Cts_apc.prop_12x5,1);
+pCqs(5,:) = pCps(5,:)/(2*pi);
+
+pCps(6,:) = polyfit(RPMs_apc.prop_11x55E ,Cps_apc.prop_11x55E ,1);
+pCts(6,:) = polyfit(RPMs_apc.prop_11x55E ,Cts_apc.prop_11x55E ,1);
+pCqs(6,:) = pCps(6,:)/(2*pi);
+
+%% Ecolha da Voltagem
+
+v = 2.4:2.4:20; % o v minúsculo é para os valores de voltagem
+
+%% Inicialização de variaveis
+
+% inicializar os vetores com zeros ajuda a dar velocidade aos loops, ja que
+% os vetores não mudam de tamanho a cada interação
+
+rho = 1.053;
+Ts = zeros(1,length(D_apc));
+RPM_perm = zeros(1,length(D_apc));
+ome_perm = zeros(1,length(D_apc));
+nhz_perm = zeros(1,length(D_apc));
+i = zeros(1,length(D_apc));
+
+%% Estático
+
+% essa secção do código é dedicada a encontrar a rotação do grupo motoprop
+% no caso estatico e calcular a sua tração nesse regime
+
+RPM = 1600:1:22000; % Rotações analizadas e seus equivalentes em rad/s (ome) e em hz (nhz)
+ome = RPM*2*pi/60;
+nhz = RPM/60;
+
+Qm = ((v(6) - ome./kv)./r - i0)./kv; % Qm é o vetor que armazena os valores de Torque do motor para cada rotação do vetor ome
+
+for I_prop = 1:6
+    
+Qps = rho*nhz.^2*D_apc(I_prop)^5.*polyval(pCqs(I_prop,:),RPM); % Qp é o vetor que armazena os valores de Torque da hélice para cada rotação correspondente do vetor nhz
+[M,I] = min(abs(Qm-Qps)); % I é o indice do vetor RPM que armazena o ponto de intersecção das curvas de Qm e Qp
+
+RPM_perm(I_prop) = RPM(I); % agora o vetor RPM armazena apenas o valor da rotação no regime permanente do estatico
+nhz_perm(I_prop) = RPM_perm(I_prop)/60;
+ome_perm(I_prop) = nhz_perm(I_prop)*2*pi;
+
+i(I_prop) = (v(5)-ome_perm(I_prop)/kv)/r;
+
+Ts(I_prop) = rho*nhz_perm(I_prop)^2*D_apc(I_prop)^4*polyval(pCts(I_prop,:),RPM_perm(I_prop))/9.81; % Ts é a tração no estatico
+
+end

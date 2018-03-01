@@ -2,7 +2,7 @@ clear
 clc
 
 load('engine_data.mat')
-load('prop_data.mat','prop_nome','prop_diametro','pCts','pCps')
+load('prop_data.mat','prop_nome','prop_diametro','pCts','pCps','Cts')
 
 %% escolha do motor
 
@@ -68,9 +68,22 @@ D_max = prop_diametro(I_max)*0.0254;
 Qp_max = rho*nhzs.^2*D_max^5.*polyval(pCps(I_max,:)/(2*pi),RPMs);
 
 
+figure('name','Curva Tação')
 plot(RPMs,Qm);
 grid minor
 hold on
 xlabel 'RPM'
 ylabel 'Torque [N/M]'
 plot(RPMs,Qp_max)
+
+load('prop_data.mat','RPMs')
+
+%% teste com a curva da melhor hélice
+pCts2 = polyfit(RPMs(I_max,4:1:14),Cts(I_max,4:1:14),2);
+
+figure('name','Curva Cts x RPM')
+plot(RPMs(I_max,:),Cts(I_max,:),'o')
+hold on
+plot(0:1:13000,polyval(pCts(I_max,:),0:1:13000))
+plot(0:1:13000,polyval(pCts2,0:1:13000),'LineWidth',1.5)
+grid minor

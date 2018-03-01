@@ -3,6 +3,8 @@ clc
 
 load('engine_data.mat') % carrega o banco de dados de motores
 
+global RPMs_apc Cps_apc Cts_apc
+
 %% escolha do motor
 
 % retira do banco de dados de motores os parametros do motor ecolhido (kv,
@@ -21,18 +23,12 @@ clear sm
 
 %% hélice
 
-% aqui temos os dados dos valores de RPM, Cp e Ct para o caso estático
-
-RPMs = [1868	2200	2450	2800	3095	3406	3716	4043	4350	4651	4968	5273	5577	5891	6213	6473];
-Cps = [0.0327	0.0323	0.032	0.0314	0.031	0.0313	0.0312	0.0312	0.0312	0.0314	0.0313	0.0314	0.0317	0.0319	0.0322	0.0323];
-Cts = [0.0777	0.0804	0.0824	0.0833	0.0838	0.0849	0.0857	0.0861	0.0862	0.087	0.0873	0.0877	0.0885	0.089	0.0897	0.0903];
-
 % é feito um polyfit para obter valores de Cp e Ct estaticos "discretos",
 % ou seja para rotações entre os valores dados no vetor RPMs
 
-pCps = polyfit(RPMs,Cps,1);
-pCts = polyfit(RPMs(3:length(RPMs)),Cts(3:length(Cts)),1); % são pegos os pontos após o terceiro para ter uma tendência de reta mais plausivel
-pCqs = pCps/(2*pi);
+pCps(1) = polyfit(RPMs_apc.prop,Cps,1);
+pCts(1) = polyfit(RPMs(3:length(RPMs)),Cts(3:length(Cts)),1); % são pegos os pontos após o terceiro para ter uma tendência de reta mais plausivel
+pCqs(1) = pCps/(2*pi);
 
 % a partir daqui são armazenados os dados de Cp e Ct para o caso dinamico.
 % Os dados aqui são tirados do site da apc e são especificos para a rotação
@@ -95,19 +91,19 @@ Ts = rho*nhz^2*D^4*0.1085/9.81; % Ts é a tração no estatico
 % caso a razão de avanço esteja entre os valores de J_min e J_max então são
 % usados apenas os dados que estão no documento do fabricante
 
-for I_V = 1:length(V)
-    J(I_V) = V(I_V)/(nhz*D);
-    if J(I_V) >= J_max
-        Ct = polyval(pCt,J_max);
-    else
-        Ct = polyval(pCt,J(I_V));
-    end
-    T(I_V) = rho*nhz^2*D^4*Ct/9.81;
-end
-
-% plota os resultados da curva de tração
-
-plot(V,T)
-grid minor
-xlabel 'Velocidade [m/s]'
-ylabel 'Tração [kg]'
+% for I_V = 1:length(V)
+%     J(I_V) = V(I_V)/(nhz*D);
+%     if J(I_V) >= J_max
+%         Ct = polyval(pCt,J_max);
+%     else
+%         Ct = polyval(pCt,J(I_V));
+%     end
+%     T(I_V) = rho*nhz^2*D^4*Ct/9.81;
+% end
+% 
+% % plota os resultados da curva de tração
+% 
+% plot(V,T)
+% grid minor
+% xlabel 'Velocidade [m/s]'
+% ylabel 'Tração [kg]'
