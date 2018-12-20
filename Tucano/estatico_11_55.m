@@ -82,3 +82,5 @@ plot(V,T)
 grid on
 xlabel 'Velocidade [m/s]'
 ylabel 'Tração [kg]'
+
+%lalala
