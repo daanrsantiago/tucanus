@@ -81,3 +81,5 @@ grid on
 xlabel 'Velocidade [m/s]'
 ylabel 'Tração [kg]'
 hold on
+
+%oi
