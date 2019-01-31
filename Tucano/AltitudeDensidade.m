@@ -8,7 +8,7 @@
 clear all;
 close all;
 clc;
-
+% oi
 %% Parâmetros iniciais
 
 P = 916 * 100; % pressao pascoal

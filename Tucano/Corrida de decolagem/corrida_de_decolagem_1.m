@@ -24,7 +24,7 @@ D_CD = get(gca,'Children');
 Re_CD = get(D_CD,'XData');
 Cd_CD = get(D_CD,'YData');
 
-clear Curva_tracao Curva_CLmax Curva_CLincidencia Curva_CD D_tracao D_CLmax D_CLincidencia D_CD
+% clear Curva_tracao Curva_CLmax Curva_CLincidencia Curva_CD D_tracao D_CLmax D_CLincidencia D_CD
 
 %% Parametros da aeronave
 
